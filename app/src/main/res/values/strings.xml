@@ -2,4 +2,14 @@
     <string name="app_name">Prototype</string>
 
     <string name="btn_confirm">Confirm</string>
+
+    <!--Message in Json Response-->
+    <string name="json_msg_error">No Network Connection, Please Connect to the Internet</string>
+    <string name="json_msg_failed">Wrong response to the Server, Please contact SFAS Administrator</string>
+
+    <!--Login String-->
+    <string name="msg_incorrect_user">Please fill the field</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
 </resources>

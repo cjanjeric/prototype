@@ -7,12 +7,16 @@ import java.io.Serializable;
  */
 public class Route implements Serializable {
 
-    public String cid;
+    public int cid;
     public String codeNo;
     public String descript;
-    public String seniorPersonnel;
-    public String dispatcherId;
-    public String truckNo;
-    public String loadingAssignmentId;
+    public int seniorPersonnel;
+    public int dispatcherId;
+    public int truckNo;
+    public int loadingAssignmentId;
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

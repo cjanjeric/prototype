@@ -11,16 +11,18 @@ import ph.gardenia.com.model.User;
  */
 public class UserHelper extends SugarRecord {
 
-    private String empId;
+    private int empId;
     private int cid;
     private String empCode;
     private String firstName;
     private String middleName;
     private String lastName;
+    private String completeName;
     private String userName;
     private String password;
-    private String userGroup;
-    private String active;
+    private int userGroup;
+    private int active;
+    private int canReallocate;
 
     public UserHelper() {
     }
@@ -33,20 +35,20 @@ public class UserHelper extends SugarRecord {
         this.firstName = user.firstName;
         this.middleName = user.middleName;
         this.lastName = user.lastName;
+        this.completeName = user.completeName;
         this.userName = user.userName;
         this.password = user.password;
         this.userGroup = user.userGroup;
         this.active = user.active;
-
-        Log.d("TAG", empId);
+        this.canReallocate = user.canReallocate;
 
     }
 
-    public String getEmpId() {
+    public int getEmpId() {
         return empId;
     }
 
-    public void setEmpId(String empId) {
+    public void setEmpId(int empId) {
         this.empId = empId;
     }
 
@@ -90,6 +92,14 @@ public class UserHelper extends SugarRecord {
         this.lastName = lastName;
     }
 
+    public String getCompleteName() {
+        return completeName;
+    }
+
+    public void setCompleteName(String completeName) {
+        this.completeName = completeName;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -106,20 +116,29 @@ public class UserHelper extends SugarRecord {
         this.password = password;
     }
 
-    public String getUserGroup() {
+    public int getUserGroup() {
         return userGroup;
     }
 
-    public void setUserGroup(String userGroup) {
+    public void setUserGroup(int userGroup) {
         this.userGroup = userGroup;
     }
 
-    public String getActive() {
+    public int getActive() {
         return active;
     }
 
-    public void setActive(String active) {
+    public void setActive(int active) {
         this.active = active;
+    }
+
+
+    public int getCanReallocate() {
+        return canReallocate;
+    }
+
+    public void setCanReallocate(int canReallocate) {
+        this.canReallocate = canReallocate;
     }
 
     @Override

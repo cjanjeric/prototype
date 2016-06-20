@@ -63,28 +63,34 @@ public class SplashFragment extends Fragment {
                 * to the accountable fragment if has not set else
                 * to the Main Activity*/
 
-                Fragment fragment = null;
+                if (!routeHelpers.isEmpty() && !userHelpers.isEmpty()) {
+                    /*Has complete setup*/
 
-                if (routeHelpers.isEmpty()) {
-                    Log.d(TAG, "HAS NO ROUTE SETUP");
                     startActivity(new Intent(getActivity(), MainActivity.class));
                     getActivity().finish();
-//                    fragment = new RouteFragment();
-//                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-//                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//                    fragmentTransaction.replace(R.id.launch, fragment);
-//                    fragmentTransaction.commit();
-                } else if (userHelpers.isEmpty()) {
-                    Log.d(TAG, "HAS NO USER SETUP");
-                    fragment = new RouteFragment();
+
+                } else {
+                    /*Incomplete setup*/
+
+                    Fragment fragment = null;
+                    if (routeHelpers.isEmpty()) {
+                        Log.d(TAG, "HAS NO ROUTE SETUP");
+                        fragment = new RouteFragment();
+
+                    } else if (userHelpers.isEmpty()) {
+                        Log.d(TAG, "HAS NO USER SETUP");
+                        fragment = new LoginFragment();
+                    }
+
                     FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.setCustomAnimations(R.anim.fragment_slide_left_enter,
+                            R.anim.fragment_slide_right_exit, R.anim.fragment_slide_right_enter,
+                            R.anim.fragment_slide_left_exit);
                     fragmentTransaction.replace(R.id.launch, fragment);
                     fragmentTransaction.commit();
-                } else {
 
                 }
-
 
             }
         }, SPLASH_SCREEN_TIME_OUT);

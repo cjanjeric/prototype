@@ -9,13 +9,13 @@ import ph.gardenia.com.model.Route;
  */
 public class RouteHelper extends SugarRecord {
 
-    private String cid;
+    private int cid;
     private String codeNo;
     private String descript;
-    private String seniorPersonnel;
-    private String dispatcherId;
-    private String truckNo;
-    private String loadingAssignmentId;
+    private int seniorPersonnel;
+    private int dispatcherId;
+    private int truckNo;
+    private int loadingAssignmentId;
 
     public RouteHelper() {
     }
@@ -32,11 +32,11 @@ public class RouteHelper extends SugarRecord {
 
     }
 
-    public String getCid() {
+    public int getCid() {
         return cid;
     }
 
-    public void setCid(String cid) {
+    public void setCid(int cid) {
         this.cid = cid;
     }
 
@@ -56,35 +56,35 @@ public class RouteHelper extends SugarRecord {
         this.descript = descript;
     }
 
-    public String getSeniorPersonnel() {
+    public int getSeniorPersonnel() {
         return seniorPersonnel;
     }
 
-    public void setSeniorPersonnel(String seniorPersonnel) {
+    public void setSeniorPersonnel(int seniorPersonnel) {
         this.seniorPersonnel = seniorPersonnel;
     }
 
-    public String getDispatcherId() {
+    public int getDispatcherId() {
         return dispatcherId;
     }
 
-    public void setDispatcherId(String dispatcherId) {
+    public void setDispatcherId(int dispatcherId) {
         this.dispatcherId = dispatcherId;
     }
 
-    public String getTruckNo() {
+    public int getTruckNo() {
         return truckNo;
     }
 
-    public void setTruckNo(String truckNo) {
+    public void setTruckNo(int truckNo) {
         this.truckNo = truckNo;
     }
 
-    public String getLoadingAssignmentId() {
+    public int getLoadingAssignmentId() {
         return loadingAssignmentId;
     }
 
-    public void setLoadingAssignmentId(String loadingAssignmentId) {
+    public void setLoadingAssignmentId(int loadingAssignmentId) {
         this.loadingAssignmentId = loadingAssignmentId;
     }
 

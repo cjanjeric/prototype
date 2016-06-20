@@ -7,14 +7,21 @@ import java.io.Serializable;
  */
 public class User implements Serializable {
 
-    public String empId;
+    public int empId;
     public int cid;
     public String empCode;
     public String firstName;
     public String middleName;
     public String lastName;
+    public String completeName;
     public String userName;
     public String password;
-    public String userGroup;
-    public String active;
+    public int userGroup;
+    public int active;
+    public int canReallocate;
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

@@ -22,19 +22,32 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
+import java.util.List;
+
 import ph.gardenia.com.fragment.DscFragment;
 import ph.gardenia.com.fragment.RouteFragment;
 import ph.gardenia.com.fragment.TransactionFragment;
+import ph.gardenia.com.helper.RouteHelper;
+import ph.gardenia.com.helper.UserHelper;
+import ph.gardenia.com.utils.Constant;
 
 public class MainActivity extends AppCompatActivity {
 
     private String TAG = getClass().getSimpleName();
+    private List<RouteHelper> routeHelpers;
+    private List<UserHelper> userHelpers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*Set Transition in activity*/
+        overridePendingTransition(R.anim.fragment_slide_left_enter, R.anim.fragment_slide_right_exit);
+
         setContentView(R.layout.activity_main);
 
+        routeHelpers = RouteHelper.listAll(RouteHelper.class);
+        userHelpers = UserHelper.listAll(UserHelper.class);
 
         /*Set the Home Fragment*/
         Fragment fragment = new Fragment();
@@ -46,17 +59,21 @@ public class MainActivity extends AppCompatActivity {
             fragmentTransaction.commit();
         }
 
+        //Instantiate toolbar to be used
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
+        //build account header of the drawer
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Gardee Gardenia").withEmail("star ave. mamplasan binan laguna").withIcon(R.drawable.profile)
+                        new ProfileDrawerItem()
+                                .withName(userHelpers.get(Constant.BASE_COLUMN).getCompleteName())
+                                .withEmail(routeHelpers.get(Constant.BASE_COLUMN).getDescript())
+                                .withIcon(R.drawable.profile)
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -87,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
                         Log.d(TAG, "POSITION " + position);
 
+                        //Instantiate fragment to be used
                         Fragment fragment = new Fragment();
                         FragmentManager fragmentManager = getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
