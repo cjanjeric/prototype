@@ -24,8 +24,12 @@ import java.util.Map;
 
 import ph.gardenia.com.callback.VolleyCallback;
 import ph.gardenia.com.fragment.LoginFragment;
+import ph.gardenia.com.helper.DownlineDscHelper;
+import ph.gardenia.com.helper.DownlineDscItemHelper;
 import ph.gardenia.com.helper.RouteHelper;
 import ph.gardenia.com.helper.UserHelper;
+import ph.gardenia.com.model.DownlineDsc;
+import ph.gardenia.com.model.DownlineDscItem;
 import ph.gardenia.com.model.Route;
 import ph.gardenia.com.model.User;
 import ph.gardenia.com.utils.Constant;
@@ -247,6 +251,122 @@ public class PullRequest {
                 params.put("route_code", routeCode);
                 params.put("username", userName);
                 params.put("password", password);
+                return params;
+            }
+        };
+
+        /*Set timeout for 50 seconds and tell not to retry the request*/
+        request.setRetryPolicy(new DefaultRetryPolicy(50000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        /*Singleton class to add request*/
+        Singleton.getInstance(context.getApplicationContext()).addToRequestQueue(request);
+
+    }
+
+    public void getDsc(final int empId, final VolleyCallback callback) {
+
+        /*This method requires employee id and use it to request
+         * data for specific new dsc table in the WebService */
+
+        Log.d(TAG, "EMPLOYEE ID " + empId);
+
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "dsc/get_dsc_today", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d(TAG, "DSC RESPONSE " + response);
+
+                try {
+
+                    JSONObject jsonObject = new JSONObject(response);
+
+                    JSONArray dscJsonArray = jsonObject.getJSONArray("dsc");
+                    for (int i = 0; i < dscJsonArray.length(); i++) {
+
+                        JSONObject dscObject = dscJsonArray.getJSONObject(i);
+
+                        DownlineDsc dsc = new DownlineDsc();
+
+                        dsc.cid = dscObject.getInt("cid");
+                        dsc.branch = dscObject.getInt("branch");
+                        dsc.dscNo = dscObject.getString("dsc_no");
+
+                        dsc.routeId = dscObject.getInt("route_id");
+                        dsc.guardId = dscObject.getInt("guard_id");
+                        byte[] guardDateTime = Base64.decode(dscObject.getString("guard_datetime"), Base64.DEFAULT);
+                        dsc.guardTime = new String(guardDateTime, "UTF-8");
+                        dsc.trayIn = dscObject.getInt("trayIN");
+                        dsc.trayOut = dscObject.getInt("trayOUT");
+                        dsc.boTrayIn = dscObject.getInt("bo_tray_in");
+                        dsc.isPreloaded = (dscObject.getInt("ispreloaded") == 1);
+                        dsc.truckerId = dscObject.getInt("trucker_id");
+                        dsc.boConfirmed = (dscObject.getInt("bo_confirmed") == 1);
+                        dsc.cashierReceived = (dscObject.getInt("cashier_received") == 1);
+                        byte[] cashierReceivedDate = Base64.decode(dscObject.getString("cashier_received_date"), Base64.DEFAULT);
+                        dsc.cashierReceivedDate = new String(cashierReceivedDate, "UTF-8");
+                        byte[] datePosted = Base64.decode(dscObject.getString("trans_date"), Base64.DEFAULT);
+                        dsc.datePosted = new String(datePosted, "UTF-8");
+
+                        Log.d(TAG, "DSC " + dsc.dscNo);
+
+                        DownlineDscHelper dscHelper = new DownlineDscHelper(dsc);
+                        dscHelper.save();
+
+                    }
+
+                    Log.d(TAG, "FIN DSC");
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_DSC);
+
+                    JSONArray dscItemsJsonArray = jsonObject.getJSONArray("dsc_items");
+
+                    for (int i = 0; i < dscItemsJsonArray.length(); i++) {
+
+                        JSONObject dscItemsObject = dscItemsJsonArray.getJSONObject(i);
+
+                        DownlineDscItem dscItem = new DownlineDscItem();
+
+                        dscItem.dscId = dscItemsObject.getInt("dsc_id");
+                        dscItem.productCode = dscItemsObject.getInt("prod_code");
+                        dscItem.issued = dscItemsObject.getInt("issued");
+                        dscItem.trayCount = dscItemsObject.getInt("tray_count");
+                        dscItem.excessPack = dscItemsObject.getInt("excess_pack");
+
+                        DownlineDscItemHelper dscItemHelper = new DownlineDscItemHelper(dscItem);
+                        dscItemHelper.save();
+
+                    }
+
+                    Log.d(TAG, "FIN DSC ITEM");
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_DSC_ITEMS);
+
+
+                } catch (JSONException e) {
+
+                    Log.d(TAG, "JSONException " + e.toString());
+                    callback.onFailed(VolleyCallback.ON_RESPONSE_JSON_ERROR);
+                    e.printStackTrace();
+
+                } catch (UnsupportedEncodingException e) {
+
+                    Log.d(TAG, "UnsupportedEncodingException " + e.toString());
+
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Log.d(TAG, "DSC ERROR " + error.getMessage());
+                error.printStackTrace();
+                callback.onFailed(VolleyCallback.ON_RESPONSE_FAILED);
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", Constant.KEY);
+                params.put("emp_id", String.valueOf(empId));
                 return params;
             }
         };
