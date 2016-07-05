@@ -26,6 +26,7 @@
         </activity>
 
         <activity android:name=".MainActivity"></activity>
+        <activity android:name=".EmptyDscActivity"></activity>
 
         <meta-data android:name="DATABASE" android:value="gardenia_sfas.db" />
         <meta-data android:name="VERSION" android:value="2" />

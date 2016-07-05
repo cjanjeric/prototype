@@ -12,4 +12,13 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
+
+
+    <!--Empty DSC-->
+    <string name="msg_please_click">Please click</string>
+    <string name="msg_get_new">to get new</string>
+    <string name="msg_dsc">DSC</string>
+
+    <!--Status-->
+    <string name="status">STATUS</string>
 </resources>

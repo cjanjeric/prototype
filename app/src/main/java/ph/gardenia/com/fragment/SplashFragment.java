@@ -15,8 +15,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import ph.gardenia.com.helper.DownlineDscHelper;
 import ph.gardenia.com.helper.RouteHelper;
 import ph.gardenia.com.helper.UserHelper;
+import ph.gardenia.com.model.DownlineDsc;
+import ph.gardenia.com.prototype.EmptyDscActivity;
 import ph.gardenia.com.prototype.MainActivity;
 import ph.gardenia.com.prototype.R;
 import ph.gardenia.com.utils.Fragments;
@@ -32,6 +35,7 @@ public class SplashFragment extends Fragment {
     private TextView txtAppName;
     private List<RouteHelper> routeHelpers;
     private List<UserHelper> userHelpers;
+    private List<DownlineDscHelper> dscHelpers;
 
     private Fragments fragments;
 
@@ -43,6 +47,7 @@ public class SplashFragment extends Fragment {
         /*Pass all data gathered from the database to list*/
         routeHelpers = RouteHelper.listAll(RouteHelper.class);
         userHelpers = UserHelper.listAll(UserHelper.class);
+        dscHelpers = DownlineDscHelper.listAll(DownlineDscHelper.class);
 
         fragments = new Fragments(getActivity());
 
@@ -66,7 +71,11 @@ public class SplashFragment extends Fragment {
                 if (!routeHelpers.isEmpty() && !userHelpers.isEmpty()) {
                     /*Has complete setup*/
 
-                    startActivity(new Intent(getActivity(), MainActivity.class));
+                    if (!dscHelpers.isEmpty()) {
+                        startActivity(new Intent(getActivity(), MainActivity.class));
+                    } else {
+                        startActivity(new Intent(getActivity(), EmptyDscActivity.class));
+                    }
                     getActivity().finish();
 
                 } else {

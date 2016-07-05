@@ -15,7 +15,9 @@ import android.widget.Toast;
 import java.util.List;
 
 import ph.gardenia.com.callback.VolleyCallback;
+import ph.gardenia.com.helper.DownlineDscHelper;
 import ph.gardenia.com.helper.RouteHelper;
+import ph.gardenia.com.prototype.EmptyDscActivity;
 import ph.gardenia.com.prototype.MainActivity;
 import ph.gardenia.com.prototype.R;
 import ph.gardenia.com.request.PullRequest;
@@ -35,6 +37,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
     private PullRequest pullRequest;
 
     private List<RouteHelper> routeHelpers;
+    private List<DownlineDscHelper> dscHelpers;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
         Log.d(TAG, "ONCREATE");
         pullRequest = new PullRequest(getActivity());
         routeHelpers = RouteHelper.listAll(RouteHelper.class);
+        dscHelpers = DownlineDscHelper.listAll(DownlineDscHelper.class);
         Log.d(TAG, "ROUTE HELPER " + routeHelpers.get(Constant.BASE_COLUMN).getCodeNo());
     }
 
@@ -80,8 +84,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
                                     switch (result){
                                         case VolleyCallback.ON_RESPONSE_SUCCESS:
 
-                                            startActivity(new Intent(getActivity(), MainActivity.class));
-                                            getActivity().finish();
+                                            if (!dscHelpers.isEmpty()) {
+                                                startActivity(new Intent(getActivity(), MainActivity.class));
+                                                getActivity().finish();
+                                            }else {
+                                                startActivity(new Intent(getActivity(), EmptyDscActivity.class));
+                                                getActivity().finish();
+                                            }
 
                                             break;
                                     }

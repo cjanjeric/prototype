@@ -14,7 +14,7 @@ public class DownlineDscItemHelper extends SugarRecord {
     private int productCode;
     private int trayCount;
     private int excessPack;
-    public ProductHelper productHelper;
+    public DownlineProductHelper productHelper;
     public DownlineDscHelper dscHelper;
 
     public DownlineDscItemHelper(){}

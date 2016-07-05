@@ -241,7 +241,6 @@ public class PullRequest {
                 error.printStackTrace();
                 callback.onFailed(VolleyCallback.ON_RESPONSE_FAILED);
 
-
             }
         }) {
             @Override
@@ -259,6 +258,52 @@ public class PullRequest {
         request.setRetryPolicy(new DefaultRetryPolicy(50000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         /*Singleton class to add request*/
         Singleton.getInstance(context.getApplicationContext()).addToRequestQueue(request);
+
+    }
+
+    public void getProduct(final VolleyCallback callback){
+
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "products/get/", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", Constant.KEY);
+                return params;
+            }
+        };
+
+    }
+
+    public void getProductPrice(final VolleyCallback callback){
+
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "products/get/", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", Constant.KEY);
+                return params;
+            }
+        };
 
     }
 

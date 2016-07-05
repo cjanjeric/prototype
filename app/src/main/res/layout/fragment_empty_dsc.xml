@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:id="@+id/rlContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/lblMsgClick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/msg_please_click"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/lblMsgNewDsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lblMsgClick"
+            android:text="@string/msg_get_new"
+            android:textSize="18sp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblStatus"
+                android:layout_width="wrap_content"
+                android:text="@string/status"
+                android:visibility="gone"
+                android:layout_centerInParent="true"
+                android:textSize="22sp"
+                android:layout_marginBottom="15dp"
+                android:layout_height="wrap_content" />
+
+            <com.github.silvestrpredko.dotprogressbar.DotProgressBar
+                android:id="@+id/pbEmptyDsc"
+                android:layout_width="match_parent"
+                android:layout_below="@+id/lblStatus"
+                android:visibility="gone"
+                android:layout_height="25dp"
+                custom:amount="5"
+                custom:duration="@android:integer/config_mediumAnimTime"
+                custom:endColor="@color/colorPrimary"
+                custom:startColor="@color/colorPrimaryDark" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/lblNewDsc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/lblClick"
+        android:includeFontPadding="false"
+        android:text="@string/msg_dsc"
+        android:textColor="@color/colorPrimary"
+        android:textSize="65sp" />
+
+</LinearLayout>

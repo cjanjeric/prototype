@@ -34,7 +34,7 @@
 
 
     <com.github.silvestrpredko.dotprogressbar.DotProgressBar
-        android:id="@+id/dot_progress_bar"
+        android:id="@+id/pbSplash"
         android:layout_width="match_parent"
         android:layout_height="25dp"
         custom:amount="5"
