@@ -1,9 +1,12 @@
 package ph.gardenia.com.fragment;
 
 import android.content.Intent;
+import android.media.CamcorderProfile;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import com.github.silvestrpredko.dotprogressbar.DotProgressBar;
 import java.util.List;
 
 import ph.gardenia.com.callback.VolleyCallback;
+import ph.gardenia.com.helper.RouteHelper;
 import ph.gardenia.com.helper.UserHelper;
 import ph.gardenia.com.prototype.MainActivity;
 import ph.gardenia.com.prototype.R;
@@ -26,6 +30,8 @@ import ph.gardenia.com.utils.Constant;
  */
 public class EmptyDscFragment extends Fragment implements View.OnClickListener {
 
+    private String TAG = getClass().getSimpleName();
+
     private TextView lblMsgClick;
     private TextView lblMsgNewDsc;
     private TextView lblNewDsc;
@@ -34,12 +40,14 @@ public class EmptyDscFragment extends Fragment implements View.OnClickListener {
 
     private PullRequest pullRequest;
     private List<UserHelper> userHelpers;
+    private List<RouteHelper> routeHelpers;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pullRequest = new PullRequest(getActivity());
         userHelpers = UserHelper.listAll(UserHelper.class);
+        routeHelpers = RouteHelper.listAll(RouteHelper.class);
     }
 
     @Nullable
@@ -58,33 +66,29 @@ public class EmptyDscFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    private void setTextVisibility(int front, int back) {
+        pbSplash.setVisibility(back);
+        lblStatus.setVisibility(back);
+        lblMsgNewDsc.setVisibility(front);
+        lblNewDsc.setVisibility(front);
+        lblMsgClick.setVisibility(front);
+    }
+
     @Override
     public void onClick(View view) {
 
         switch (view.getId()) {
             case R.id.lblNewDsc:
 
-                pbSplash.setVisibility(View.VISIBLE);
-                lblStatus.setVisibility(View.VISIBLE);
-                lblMsgNewDsc.setVisibility(View.GONE);
-                lblNewDsc.setVisibility(View.GONE);
-                lblMsgClick.setVisibility(View.GONE);
+                setTextVisibility(View.GONE, View.VISIBLE);
+                lblStatus.setText("FETCHING PRODUCTS");
 
-                pullRequest.getDsc(userHelpers.get(Constant.BASE_COLUMN).getEmpId(), new VolleyCallback() {
+                pullRequest.getProduct(new VolleyCallback() {
                     @Override
                     public void onSuccess(int result) {
 
-                        switch (result){
-                            case VolleyCallback.ON_DOWLINE_STATE_DSC:
-                                lblStatus.setText("FETCHING DSC");
-                                break;
-                            case VolleyCallback.ON_DOWLINE_STATE_DSC_ITEMS:
-                                lblStatus.setText("FETCHING DSC ITEMS");
-                                break;
-                        }
-
-                        startActivity(new Intent(getActivity(), MainActivity.class));
-                        getActivity().finish();
+                        Log.d(TAG, "WEW");
+                        getProductPrice();
 
                     }
 
@@ -103,5 +107,96 @@ public class EmptyDscFragment extends Fragment implements View.OnClickListener {
 
         }
     }
+
+    public void getProductPrice() {
+        Log.d(TAG, "PRODUCT PRICE");
+        lblStatus.setText("FETCHING PRODUCTS PRICE");
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                pullRequest.getProductPrice(new VolleyCallback() {
+                    @Override
+                    public void onSuccess(int result) {
+                        GetCustomer getCustomer = new GetCustomer(routeHelpers.get(Constant.BASE_COLUMN).getCodeNo());
+                        getCustomer.execute();
+                    }
+
+                    @Override
+                    public void onFailed(int result) {
+
+                    }
+
+                    @Override
+                    public void onStringResponse(String result) {
+
+                    }
+                });
+            }
+        };
+        new Thread(runnable).start();
+    }
+
+    public class GetCustomer extends AsyncTask<String, Integer, String> {
+
+        String routeCode;
+
+        public GetCustomer(String routeCode) {
+            this.routeCode = routeCode;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            lblStatus.setText("FETCHING CUSTOMER");
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            pullRequest.getCustomer(routeCode, new VolleyCallback() {
+                @Override
+                public void onSuccess(int result) {
+                    getDsc(userHelpers.get(Constant.BASE_COLUMN).getEmpId());
+                }
+
+                @Override
+                public void onFailed(int result) {
+
+                }
+
+                @Override
+                public void onStringResponse(String result) {
+
+                }
+            });
+            return null;
+        }
+
+
+    }
+
+    private void getDsc(int empId) {
+        lblStatus.setText("FETCHING DSC");
+        pullRequest.getDsc(empId, new VolleyCallback() {
+            @Override
+            public void onSuccess(int result) {
+
+                startActivity(new Intent(getActivity(), MainActivity.class));
+                getActivity().finish();
+
+            }
+
+            @Override
+            public void onFailed(int result) {
+
+            }
+
+            @Override
+            public void onStringResponse(String result) {
+
+            }
+        });
+    }
+
 
 }

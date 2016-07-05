@@ -24,12 +24,18 @@ import java.util.Map;
 
 import ph.gardenia.com.callback.VolleyCallback;
 import ph.gardenia.com.fragment.LoginFragment;
+import ph.gardenia.com.helper.DownlineCustomerHelper;
 import ph.gardenia.com.helper.DownlineDscHelper;
 import ph.gardenia.com.helper.DownlineDscItemHelper;
+import ph.gardenia.com.helper.DownlineProductHelper;
+import ph.gardenia.com.helper.DownlineProductPriceHelper;
 import ph.gardenia.com.helper.RouteHelper;
 import ph.gardenia.com.helper.UserHelper;
+import ph.gardenia.com.model.DownlineCustomer;
 import ph.gardenia.com.model.DownlineDsc;
 import ph.gardenia.com.model.DownlineDscItem;
+import ph.gardenia.com.model.DownlineProduct;
+import ph.gardenia.com.model.DownlineProductPrice;
 import ph.gardenia.com.model.Route;
 import ph.gardenia.com.model.User;
 import ph.gardenia.com.utils.Constant;
@@ -261,11 +267,50 @@ public class PullRequest {
 
     }
 
-    public void getProduct(final VolleyCallback callback){
+    public void getProduct(final VolleyCallback callback) {
+
+        Log.d(TAG, "PRODUCT");
 
         StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "products/get/", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+
+                    for (int index = 0; index < jsonArray.length(); index++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(index);
+                        JSONObject jsonProduct = jsonObject.getJSONObject("product");
+
+                        DownlineProduct product = new DownlineProduct();
+                        product.cid = jsonProduct.getInt("cid");
+                        product.prodCode = jsonProduct.getString("prod_code");
+                        product.alias = jsonProduct.getString("prod_code2");
+                        product.description = jsonProduct.getString("descript");
+                        product.srp = jsonProduct.getDouble("srp");
+                        product.packsPerTray = jsonProduct.getInt("packs_per_tray");
+
+                        // Decodes the barcode to make it more human readable
+                        byte[] barcode = Base64.decode(jsonProduct.getString("barcode"), Base64.DEFAULT);
+                        product.barcode = new String(barcode, "UTF-8");
+
+                        product.isActive = (jsonProduct.getInt("isactive") == 1);
+                        product.discountExcluded = (jsonProduct.getInt("discount_excluded") == 1);
+
+                        DownlineProductHelper downlineProductHelper = new DownlineProductHelper(product);
+                        downlineProductHelper.save();
+
+                        Log.d(TAG, "PRODUCT NAME " + product.description);
+
+                    }
+
+                } catch (JSONException e) {
+
+                } catch (UnsupportedEncodingException e){
+
+                }
+
+                callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_PRODUCT);
 
             }
         }, new Response.ErrorListener() {
@@ -273,7 +318,7 @@ public class PullRequest {
             public void onErrorResponse(VolleyError error) {
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
@@ -281,14 +326,43 @@ public class PullRequest {
                 return params;
             }
         };
+
+        /*Set timeout for 50 seconds and tell not to retry the request*/
+        request.setRetryPolicy(new DefaultRetryPolicy(50000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        /*Singleton class to add request*/
+        Singleton.getInstance(context.getApplicationContext()).addToRequestQueue(request);
 
     }
 
-    public void getProductPrice(final VolleyCallback callback){
+    public void getProductPrice(final VolleyCallback callback) {
 
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "products/get/", new Response.Listener<String>() {
+        Log.d(TAG, "PRODUCT PRICE ");
+
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "list_price/get/", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+
+                    for (int index = 0; index < jsonArray.length(); index++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(index);
+                        JSONObject jsonItem = jsonObject.getJSONObject("list_price");
+
+                        DownlineProductPrice productPrice = new DownlineProductPrice();
+                        productPrice.discountTypeId = jsonItem.getInt("discount_type_id");
+                        productPrice.productCode = jsonItem.getInt("prod_code");
+                        productPrice.amount = jsonItem.getDouble("amount");
+
+                        DownlineProductPriceHelper downlineProductPriceHelper = new DownlineProductPriceHelper(productPrice);
+                        downlineProductPriceHelper.save();
+
+                        Log.d(TAG, "PRODUCT PRICE " + productPrice.productCode);
+
+                    }
+                }catch (JSONException e){
+
+                }
 
             }
         }, new Response.ErrorListener() {
@@ -296,7 +370,7 @@ public class PullRequest {
             public void onErrorResponse(VolleyError error) {
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
@@ -304,6 +378,102 @@ public class PullRequest {
                 return params;
             }
         };
+
+        /*Set timeout for 50 seconds and tell not to retry the request*/
+        request.setRetryPolicy(new DefaultRetryPolicy(50000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        /*Singleton class to add request*/
+        Singleton.getInstance(context.getApplicationContext()).addToRequestQueue(request);
+
+    }
+
+    public void getCustomer(final String routeCode, final VolleyCallback callback) {
+
+        Log.d(TAG, "CUSTOMER");
+
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "customers/get_by_route", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+
+                    for (int index = 0; index < jsonArray.length(); index++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(index);
+                        JSONObject jsonCustomer = jsonObject.getJSONObject("customer");
+
+                        DownlineCustomer customer = new DownlineCustomer();
+                        customer.cid = jsonCustomer.getInt("cid");
+                        customer.branch = jsonCustomer.getInt("branch");
+                        customer.ancestor = jsonCustomer.getString("ancestor");
+                        customer.customerCode = jsonCustomer.getString("customer_code");
+
+                        // Decodes all the encoded string
+                        byte[] customerName = Base64.decode(jsonCustomer.getString("cust_name"), Base64.DEFAULT);
+                        customer.customerName = new String(customerName, "UTF-8");
+                        byte[] outletName = Base64.decode(jsonCustomer.getString("outlet_name"), Base64.DEFAULT);
+                        customer.outletName = new String(outletName, "UTF-8");
+                        byte[] businessAddress = Base64.decode(jsonCustomer.getString("business_address"), Base64.DEFAULT);
+                        customer.businessAddress = new String(businessAddress, "UTF-8");
+
+                        customer.tinNo = jsonCustomer.getString("tin_no");
+                        customer.telephoneNum = jsonCustomer.getString("tel_no");
+                        customer.faxNo = jsonCustomer.getString("fax_no");
+                        customer.storeType = jsonCustomer.getInt("store_type");
+                        customer.payType = jsonCustomer.getInt("pay_type");
+                        customer.routeId = jsonCustomer.getInt("route_id");
+                        customer.bankCode = jsonCustomer.getString("bank_code");
+                        customer.tradeDiscount = jsonCustomer.getDouble("trade_discount");
+                        customer.decimalPlaces = jsonCustomer.getInt("decimal_places");
+
+                        customer.needDr = (jsonCustomer.getInt("need_dr") == 1);
+                        customer.needSi = (jsonCustomer.getInt("need_si") == 1);
+                        customer.showExchangeDr = (jsonCustomer.getInt("show_exchange_dr") == 1);
+                        customer.showExchangeSi = (jsonCustomer.getInt("show_exchange_si") == 1);
+
+                        customer.zeroRated = (jsonCustomer.getInt("zerorated") == 1);
+
+                        customer.storeDescription = jsonCustomer.getString("sdesc");
+                        customer.discountType = jsonCustomer.getInt("discount_type");
+                        customer.maxPrintCopies = jsonCustomer.getInt("max_print_copies");
+                        customer.prodCodeId = jsonCustomer.getInt("prod_code_id");
+                        customer.isManualRs = jsonCustomer.getInt("is_manual_rs") == 1;
+                        customer.hasEwt = jsonCustomer.getInt("with_ewt") == 1;
+                        customer.needDpv = jsonCustomer.getInt("need_dpv") == 1;
+                        customer.needGrv = jsonCustomer.getInt("need_grv") == 1;
+                        customer.needPo = jsonCustomer.getInt("need_po") == 1;
+
+                        Log.d(TAG, "CUSTOMER NAME " + customer.customerName);
+
+                        DownlineCustomerHelper customerHelper = new DownlineCustomerHelper(customer);
+                        customerHelper.save();
+
+                    }
+                } catch (JSONException e) {
+
+                } catch (UnsupportedEncodingException e) {
+
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", Constant.KEY);
+                params.put("route_code", routeCode);
+                return params;
+            }
+        };
+
+        /*Set timeout for 50 seconds and tell not to retry the request*/
+        request.setRetryPolicy(new DefaultRetryPolicy(50000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        /*Singleton class to add request*/
+        Singleton.getInstance(context.getApplicationContext()).addToRequestQueue(request);
 
     }
 

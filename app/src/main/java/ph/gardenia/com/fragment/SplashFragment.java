@@ -29,6 +29,7 @@ import ph.gardenia.com.utils.Fragments;
  */
 public class SplashFragment extends Fragment {
 
+
     private String TAG = getClass().getSimpleName();
     private int SPLASH_SCREEN_TIME_OUT = 5000;
 
