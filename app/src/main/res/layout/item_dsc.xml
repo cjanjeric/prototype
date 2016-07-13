@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:orientation="horizontal"
+    android:weightSum="10">
+
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_margin="10dp"
+        android:layout_weight="1"
+        android:gravity="center|left">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <View
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/circle">
+
+            </View>
+
+            <TextView
+                android:id="@+id/txtCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:text="@string/app_name"
+                android:textColor="@color/abc_primary_text_disable_only_material_dark"
+                android:textSize="22sp" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_weight="7"
+        android:gravity="center">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center|left">
+
+            <TextView
+                android:id="@+id/txtDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/app_name"
+                android:textSize="18dp" />
+
+            <TextView
+                android:id="@+id/txtSerialCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtDescription"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/app_name" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_weight="2"
+        android:gravity="center">
+
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/txtQuantity"
+                android:src="@drawable/ic_local_offer_black_24dp"
+                android:tint="#FF0C3E59" />
+
+            <TextView
+                android:id="@+id/txtQuantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

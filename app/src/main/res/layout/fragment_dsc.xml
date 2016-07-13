@@ -9,28 +9,146 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
+        android:background="@color/colorViewBackGround"
         android:layout_weight="2.5">
 
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:orientation="vertical"
-           android:background="@color/colorViewBackGround"
-           android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="15dip"
+            android:layout_weight="7"
+            android:gravity="center|left|top"
+            android:orientation="vertical">
 
             <TextView
+                android:id="@+id/lblTagRouteVsm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DSC"
-                android:textColor="@color/colorPrimary" />
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/lblSalesman"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="15sp" />
 
             <TextView
+                android:id="@+id/lblDscVsm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DSCaaaaaaaaaaaaa"
-                android:textColor="@color/colorPrimary" />
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/app_name"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-       </LinearLayout>
+            <TextView
+                android:id="@+id/lblTagDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/lblDate"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="15sp" />
 
+            <TextView
+                android:id="@+id/lblDscDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/app_name"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/lblTagRoute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/lblRoute"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/lblRoute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/app_name"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="10dp"
+            android:layout_weight="3"
+            android:gravity="center|top"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="2.6"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/lblDsc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:fontFamily="sans-serif-light"
+                    android:text="L0017502"
+                    android:textColor="@color/abc_primary_text_material_dark"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/lblTagTrayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lblDsc"
+                    android:fontFamily="sans-serif-light"
+                    android:text="Tray-Out: "
+                    android:textColor="@color/abc_primary_text_material_dark"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/lblTrayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/lblTagTrayout"
+                    android:layout_toEndOf="@+id/lblTagTrayout"
+                    android:layout_toRightOf="@+id/lblTagTrayout"
+                    android:fontFamily="sans-serif-light"
+                    android:text="123 "
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7.5"
+        >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvDsc"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
     </LinearLayout>
 
 

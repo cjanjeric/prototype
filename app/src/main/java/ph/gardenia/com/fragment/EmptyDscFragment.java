@@ -2,7 +2,6 @@ package ph.gardenia.com.fragment;
 
 import android.content.Intent;
 import android.media.CamcorderProfile;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -111,68 +110,43 @@ public class EmptyDscFragment extends Fragment implements View.OnClickListener {
     public void getProductPrice() {
         Log.d(TAG, "PRODUCT PRICE");
         lblStatus.setText("FETCHING PRODUCTS PRICE");
-        Runnable runnable = new Runnable() {
+        pullRequest.getProductPrice(new VolleyCallback() {
             @Override
-            public void run() {
-                pullRequest.getProductPrice(new VolleyCallback() {
-                    @Override
-                    public void onSuccess(int result) {
-                        GetCustomer getCustomer = new GetCustomer(routeHelpers.get(Constant.BASE_COLUMN).getCodeNo());
-                        getCustomer.execute();
-                    }
-
-                    @Override
-                    public void onFailed(int result) {
-
-                    }
-
-                    @Override
-                    public void onStringResponse(String result) {
-
-                    }
-                });
+            public void onSuccess(int result) {
+                getCustomer(routeHelpers.get(Constant.BASE_COLUMN).getCodeNo());
             }
-        };
-        new Thread(runnable).start();
+
+            @Override
+            public void onFailed(int result) {
+
+            }
+
+            @Override
+            public void onStringResponse(String result) {
+
+            }
+        });
     }
 
-    public class GetCustomer extends AsyncTask<String, Integer, String> {
 
-        String routeCode;
+    private void getCustomer(String routeCode) {
+        lblStatus.setText("FETCHING CUSTOMER");
+        pullRequest.getCustomer(routeCode, new VolleyCallback() {
+            @Override
+            public void onSuccess(int result) {
+                getDsc(userHelpers.get(Constant.BASE_COLUMN).getEmpId());
+            }
 
-        public GetCustomer(String routeCode) {
-            this.routeCode = routeCode;
-        }
+            @Override
+            public void onFailed(int result) {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            lblStatus.setText("FETCHING CUSTOMER");
-        }
+            }
 
-        @Override
-        protected String doInBackground(String... strings) {
+            @Override
+            public void onStringResponse(String result) {
 
-            pullRequest.getCustomer(routeCode, new VolleyCallback() {
-                @Override
-                public void onSuccess(int result) {
-                    getDsc(userHelpers.get(Constant.BASE_COLUMN).getEmpId());
-                }
-
-                @Override
-                public void onFailed(int result) {
-
-                }
-
-                @Override
-                public void onStringResponse(String result) {
-
-                }
-            });
-            return null;
-        }
-
-
+            }
+        });
     }
 
     private void getDsc(int empId) {

@@ -1,6 +1,8 @@
 package ph.gardenia.com.request;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
@@ -27,6 +29,7 @@ import ph.gardenia.com.fragment.LoginFragment;
 import ph.gardenia.com.helper.DownlineCustomerHelper;
 import ph.gardenia.com.helper.DownlineDscHelper;
 import ph.gardenia.com.helper.DownlineDscItemHelper;
+import ph.gardenia.com.helper.DownlineForecastHelper;
 import ph.gardenia.com.helper.DownlineProductHelper;
 import ph.gardenia.com.helper.DownlineProductPriceHelper;
 import ph.gardenia.com.helper.RouteHelper;
@@ -34,6 +37,7 @@ import ph.gardenia.com.helper.UserHelper;
 import ph.gardenia.com.model.DownlineCustomer;
 import ph.gardenia.com.model.DownlineDsc;
 import ph.gardenia.com.model.DownlineDscItem;
+import ph.gardenia.com.model.DownlineForecast;
 import ph.gardenia.com.model.DownlineProduct;
 import ph.gardenia.com.model.DownlineProductPrice;
 import ph.gardenia.com.model.Route;
@@ -273,44 +277,11 @@ public class PullRequest {
 
         StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "products/get/", new Response.Listener<String>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(final String response) {
 
-                try {
-                    JSONArray jsonArray = new JSONArray(response);
 
-                    for (int index = 0; index < jsonArray.length(); index++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(index);
-                        JSONObject jsonProduct = jsonObject.getJSONObject("product");
+                new GetProduct(response, callback).execute();
 
-                        DownlineProduct product = new DownlineProduct();
-                        product.cid = jsonProduct.getInt("cid");
-                        product.prodCode = jsonProduct.getString("prod_code");
-                        product.alias = jsonProduct.getString("prod_code2");
-                        product.description = jsonProduct.getString("descript");
-                        product.srp = jsonProduct.getDouble("srp");
-                        product.packsPerTray = jsonProduct.getInt("packs_per_tray");
-
-                        // Decodes the barcode to make it more human readable
-                        byte[] barcode = Base64.decode(jsonProduct.getString("barcode"), Base64.DEFAULT);
-                        product.barcode = new String(barcode, "UTF-8");
-
-                        product.isActive = (jsonProduct.getInt("isactive") == 1);
-                        product.discountExcluded = (jsonProduct.getInt("discount_excluded") == 1);
-
-                        DownlineProductHelper downlineProductHelper = new DownlineProductHelper(product);
-                        downlineProductHelper.save();
-
-                        Log.d(TAG, "PRODUCT NAME " + product.description);
-
-                    }
-
-                } catch (JSONException e) {
-
-                } catch (UnsupportedEncodingException e){
-
-                }
-
-                callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_PRODUCT);
 
             }
         }, new Response.ErrorListener() {
@@ -332,6 +303,73 @@ public class PullRequest {
         /*Singleton class to add request*/
         Singleton.getInstance(context.getApplicationContext()).addToRequestQueue(request);
 
+    }
+
+    public class GetProduct extends AsyncTask<Integer, Integer, Integer> {
+
+        VolleyCallback callback;
+        String response;
+
+        public GetProduct(String response, VolleyCallback callback) {
+            this.response = response;
+            this.callback = callback;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+
+            switch (values[0]) {
+                case VolleyCallback.ON_DOWLINE_STATE_PRODUCT:
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_PRODUCT);
+                    break;
+            }
+
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... integers) {
+
+
+            try {
+                JSONArray jsonArray = new JSONArray(response);
+
+                for (int index = 0; index < jsonArray.length(); index++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(index);
+                    JSONObject jsonProduct = jsonObject.getJSONObject("product");
+
+                    DownlineProduct product = new DownlineProduct();
+                    product.cid = jsonProduct.getInt("cid");
+                    product.prodCode = jsonProduct.getString("prod_code");
+                    product.alias = jsonProduct.getString("prod_code2");
+                    product.description = jsonProduct.getString("descript");
+                    product.srp = jsonProduct.getDouble("srp");
+                    product.packsPerTray = jsonProduct.getInt("packs_per_tray");
+
+                    // Decodes the barcode to make it more human readable
+                    byte[] barcode = Base64.decode(jsonProduct.getString("barcode"), Base64.DEFAULT);
+                    product.barcode = new String(barcode, "UTF-8");
+
+                    product.isActive = (jsonProduct.getInt("isactive") == 1);
+                    product.discountExcluded = (jsonProduct.getInt("discount_excluded") == 1);
+
+                    DownlineProductHelper downlineProductHelper = new DownlineProductHelper(product);
+                    downlineProductHelper.save();
+
+                    Log.d(TAG, "PRODUCT NAME " + product.description);
+
+                }
+
+                publishProgress(VolleyCallback.ON_DOWLINE_STATE_PRODUCT);
+
+            } catch (JSONException e) {
+
+            } catch (UnsupportedEncodingException e) {
+
+            }
+
+            return null;
+        }
     }
 
     public void getProductPrice(final VolleyCallback callback) {
@@ -340,29 +378,9 @@ public class PullRequest {
 
         StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "list_price/get/", new Response.Listener<String>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(final String response) {
 
-                try {
-                    JSONArray jsonArray = new JSONArray(response);
-
-                    for (int index = 0; index < jsonArray.length(); index++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(index);
-                        JSONObject jsonItem = jsonObject.getJSONObject("list_price");
-
-                        DownlineProductPrice productPrice = new DownlineProductPrice();
-                        productPrice.discountTypeId = jsonItem.getInt("discount_type_id");
-                        productPrice.productCode = jsonItem.getInt("prod_code");
-                        productPrice.amount = jsonItem.getDouble("amount");
-
-                        DownlineProductPriceHelper downlineProductPriceHelper = new DownlineProductPriceHelper(productPrice);
-                        downlineProductPriceHelper.save();
-
-                        Log.d(TAG, "PRODUCT PRICE " + productPrice.productCode);
-
-                    }
-                }catch (JSONException e){
-
-                }
+                new GetProductPrice(response, callback).execute();
 
             }
         }, new Response.ErrorListener() {
@@ -386,73 +404,70 @@ public class PullRequest {
 
     }
 
+    public class GetProductPrice extends AsyncTask<Integer, Integer, Integer> {
+
+        String response;
+        VolleyCallback callback;
+
+        public GetProductPrice(String response, VolleyCallback callback) {
+            this.response = response;
+            this.callback = callback;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+
+            switch (values[0]) {
+                case VolleyCallback.ON_DOWLINE_STATE_PRODUCT_PRICE:
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_PRODUCT_PRICE);
+                    break;
+            }
+
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... integers) {
+
+            try {
+                JSONArray jsonArray = new JSONArray(response);
+
+                for (int index = 0; index < jsonArray.length(); index++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(index);
+                    JSONObject jsonItem = jsonObject.getJSONObject("list_price");
+
+                    DownlineProductPrice productPrice = new DownlineProductPrice();
+                    productPrice.discountTypeId = jsonItem.getInt("discount_type_id");
+                    productPrice.productCode = jsonItem.getInt("prod_code");
+                    productPrice.amount = jsonItem.getDouble("amount");
+
+                    DownlineProductPriceHelper downlineProductPriceHelper = new DownlineProductPriceHelper(productPrice);
+                    downlineProductPriceHelper.save();
+
+                    Log.d(TAG, "PRODUCT PRICE " + productPrice.productCode);
+
+                }
+
+                publishProgress(VolleyCallback.ON_DOWLINE_STATE_PRODUCT_PRICE);
+
+            } catch (JSONException e) {
+
+            }
+
+
+            return null;
+        }
+    }
+
     public void getCustomer(final String routeCode, final VolleyCallback callback) {
 
         Log.d(TAG, "CUSTOMER");
 
         StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "customers/get_by_route", new Response.Listener<String>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(final String response) {
 
-                try {
-                    JSONArray jsonArray = new JSONArray(response);
-
-                    for (int index = 0; index < jsonArray.length(); index++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(index);
-                        JSONObject jsonCustomer = jsonObject.getJSONObject("customer");
-
-                        DownlineCustomer customer = new DownlineCustomer();
-                        customer.cid = jsonCustomer.getInt("cid");
-                        customer.branch = jsonCustomer.getInt("branch");
-                        customer.ancestor = jsonCustomer.getString("ancestor");
-                        customer.customerCode = jsonCustomer.getString("customer_code");
-
-                        // Decodes all the encoded string
-                        byte[] customerName = Base64.decode(jsonCustomer.getString("cust_name"), Base64.DEFAULT);
-                        customer.customerName = new String(customerName, "UTF-8");
-                        byte[] outletName = Base64.decode(jsonCustomer.getString("outlet_name"), Base64.DEFAULT);
-                        customer.outletName = new String(outletName, "UTF-8");
-                        byte[] businessAddress = Base64.decode(jsonCustomer.getString("business_address"), Base64.DEFAULT);
-                        customer.businessAddress = new String(businessAddress, "UTF-8");
-
-                        customer.tinNo = jsonCustomer.getString("tin_no");
-                        customer.telephoneNum = jsonCustomer.getString("tel_no");
-                        customer.faxNo = jsonCustomer.getString("fax_no");
-                        customer.storeType = jsonCustomer.getInt("store_type");
-                        customer.payType = jsonCustomer.getInt("pay_type");
-                        customer.routeId = jsonCustomer.getInt("route_id");
-                        customer.bankCode = jsonCustomer.getString("bank_code");
-                        customer.tradeDiscount = jsonCustomer.getDouble("trade_discount");
-                        customer.decimalPlaces = jsonCustomer.getInt("decimal_places");
-
-                        customer.needDr = (jsonCustomer.getInt("need_dr") == 1);
-                        customer.needSi = (jsonCustomer.getInt("need_si") == 1);
-                        customer.showExchangeDr = (jsonCustomer.getInt("show_exchange_dr") == 1);
-                        customer.showExchangeSi = (jsonCustomer.getInt("show_exchange_si") == 1);
-
-                        customer.zeroRated = (jsonCustomer.getInt("zerorated") == 1);
-
-                        customer.storeDescription = jsonCustomer.getString("sdesc");
-                        customer.discountType = jsonCustomer.getInt("discount_type");
-                        customer.maxPrintCopies = jsonCustomer.getInt("max_print_copies");
-                        customer.prodCodeId = jsonCustomer.getInt("prod_code_id");
-                        customer.isManualRs = jsonCustomer.getInt("is_manual_rs") == 1;
-                        customer.hasEwt = jsonCustomer.getInt("with_ewt") == 1;
-                        customer.needDpv = jsonCustomer.getInt("need_dpv") == 1;
-                        customer.needGrv = jsonCustomer.getInt("need_grv") == 1;
-                        customer.needPo = jsonCustomer.getInt("need_po") == 1;
-
-                        Log.d(TAG, "CUSTOMER NAME " + customer.customerName);
-
-                        DownlineCustomerHelper customerHelper = new DownlineCustomerHelper(customer);
-                        customerHelper.save();
-
-                    }
-                } catch (JSONException e) {
-
-                } catch (UnsupportedEncodingException e) {
-
-                }
+                new GetCustomer(response, callback).execute();
 
             }
         }, new Response.ErrorListener() {
@@ -477,6 +492,96 @@ public class PullRequest {
 
     }
 
+    public class GetCustomer extends AsyncTask<Integer, Integer, Integer> {
+
+        String response;
+        VolleyCallback callback;
+
+        public GetCustomer(String response, VolleyCallback callback) {
+            this.response = response;
+            this.callback = callback;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            switch (values[0]) {
+                case VolleyCallback.ON_DOWLINE_STATE_CUSTOMER:
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_CUSTOMER);
+                    break;
+            }
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... integers) {
+
+            try {
+                JSONArray jsonArray = new JSONArray(response);
+
+                for (int index = 0; index < jsonArray.length(); index++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(index);
+                    JSONObject jsonCustomer = jsonObject.getJSONObject("customer");
+
+                    DownlineCustomer customer = new DownlineCustomer();
+                    customer.cid = jsonCustomer.getInt("cid");
+                    customer.branch = jsonCustomer.getInt("branch");
+                    customer.ancestor = jsonCustomer.getString("ancestor");
+                    customer.customerCode = jsonCustomer.getString("customer_code");
+
+                    // Decodes all the encoded string
+                    byte[] customerName = Base64.decode(jsonCustomer.getString("cust_name"), Base64.DEFAULT);
+                    customer.customerName = new String(customerName, "UTF-8");
+                    byte[] outletName = Base64.decode(jsonCustomer.getString("outlet_name"), Base64.DEFAULT);
+                    customer.outletName = new String(outletName, "UTF-8");
+                    byte[] businessAddress = Base64.decode(jsonCustomer.getString("business_address"), Base64.DEFAULT);
+                    customer.businessAddress = new String(businessAddress, "UTF-8");
+
+                    customer.tinNo = jsonCustomer.getString("tin_no");
+                    customer.telephoneNum = jsonCustomer.getString("tel_no");
+                    customer.faxNo = jsonCustomer.getString("fax_no");
+                    customer.storeType = jsonCustomer.getInt("store_type");
+                    customer.payType = jsonCustomer.getInt("pay_type");
+                    customer.routeId = jsonCustomer.getInt("route_id");
+                    customer.bankCode = jsonCustomer.getString("bank_code");
+                    customer.tradeDiscount = jsonCustomer.getDouble("trade_discount");
+                    customer.decimalPlaces = jsonCustomer.getInt("decimal_places");
+
+                    customer.needDr = (jsonCustomer.getInt("need_dr") == 1);
+                    customer.needSi = (jsonCustomer.getInt("need_si") == 1);
+                    customer.showExchangeDr = (jsonCustomer.getInt("show_exchange_dr") == 1);
+                    customer.showExchangeSi = (jsonCustomer.getInt("show_exchange_si") == 1);
+
+                    customer.zeroRated = (jsonCustomer.getInt("zerorated") == 1);
+
+                    customer.storeDescription = jsonCustomer.getString("sdesc");
+                    customer.discountType = jsonCustomer.getInt("discount_type");
+                    customer.maxPrintCopies = jsonCustomer.getInt("max_print_copies");
+                    customer.prodCodeId = jsonCustomer.getInt("prod_code_id");
+                    customer.isManualRs = jsonCustomer.getInt("is_manual_rs") == 1;
+                    customer.hasEwt = jsonCustomer.getInt("with_ewt") == 1;
+                    customer.needDpv = jsonCustomer.getInt("need_dpv") == 1;
+                    customer.needGrv = jsonCustomer.getInt("need_grv") == 1;
+                    customer.needPo = jsonCustomer.getInt("need_po") == 1;
+
+                    Log.d(TAG, "CUSTOMER NAME " + customer.customerName);
+
+                    DownlineCustomerHelper customerHelper = new DownlineCustomerHelper(customer);
+                    customerHelper.save();
+
+                }
+
+                publishProgress(VolleyCallback.ON_DOWLINE_STATE_CUSTOMER);
+
+            } catch (JSONException e) {
+
+            } catch (UnsupportedEncodingException e) {
+
+            }
+
+            return null;
+        }
+    }
+
     public void getDsc(final int empId, final VolleyCallback callback) {
 
         /*This method requires employee id and use it to request
@@ -486,85 +591,11 @@ public class PullRequest {
 
         StringRequest request = new StringRequest(Request.Method.POST, Constant.BASE_DOWNLINE_URL + "dsc/get_dsc_today", new Response.Listener<String>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(final String response) {
 
                 Log.d(TAG, "DSC RESPONSE " + response);
 
-                try {
-
-                    JSONObject jsonObject = new JSONObject(response);
-
-                    JSONArray dscJsonArray = jsonObject.getJSONArray("dsc");
-                    for (int i = 0; i < dscJsonArray.length(); i++) {
-
-                        JSONObject dscObject = dscJsonArray.getJSONObject(i);
-
-                        DownlineDsc dsc = new DownlineDsc();
-
-                        dsc.cid = dscObject.getInt("cid");
-                        dsc.branch = dscObject.getInt("branch");
-                        dsc.dscNo = dscObject.getString("dsc_no");
-
-                        dsc.routeId = dscObject.getInt("route_id");
-                        dsc.guardId = dscObject.getInt("guard_id");
-                        byte[] guardDateTime = Base64.decode(dscObject.getString("guard_datetime"), Base64.DEFAULT);
-                        dsc.guardTime = new String(guardDateTime, "UTF-8");
-                        dsc.trayIn = dscObject.getInt("trayIN");
-                        dsc.trayOut = dscObject.getInt("trayOUT");
-                        dsc.boTrayIn = dscObject.getInt("bo_tray_in");
-                        dsc.isPreloaded = (dscObject.getInt("ispreloaded") == 1);
-                        dsc.truckerId = dscObject.getInt("trucker_id");
-                        dsc.boConfirmed = (dscObject.getInt("bo_confirmed") == 1);
-                        dsc.cashierReceived = (dscObject.getInt("cashier_received") == 1);
-                        byte[] cashierReceivedDate = Base64.decode(dscObject.getString("cashier_received_date"), Base64.DEFAULT);
-                        dsc.cashierReceivedDate = new String(cashierReceivedDate, "UTF-8");
-                        byte[] datePosted = Base64.decode(dscObject.getString("trans_date"), Base64.DEFAULT);
-                        dsc.datePosted = new String(datePosted, "UTF-8");
-
-                        Log.d(TAG, "DSC " + dsc.dscNo);
-
-                        DownlineDscHelper dscHelper = new DownlineDscHelper(dsc);
-                        dscHelper.save();
-
-                    }
-
-                    Log.d(TAG, "FIN DSC");
-                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_DSC);
-
-                    JSONArray dscItemsJsonArray = jsonObject.getJSONArray("dsc_items");
-
-                    for (int i = 0; i < dscItemsJsonArray.length(); i++) {
-
-                        JSONObject dscItemsObject = dscItemsJsonArray.getJSONObject(i);
-
-                        DownlineDscItem dscItem = new DownlineDscItem();
-
-                        dscItem.dscId = dscItemsObject.getInt("dsc_id");
-                        dscItem.productCode = dscItemsObject.getInt("prod_code");
-                        dscItem.issued = dscItemsObject.getInt("issued");
-                        dscItem.trayCount = dscItemsObject.getInt("tray_count");
-                        dscItem.excessPack = dscItemsObject.getInt("excess_pack");
-
-                        DownlineDscItemHelper dscItemHelper = new DownlineDscItemHelper(dscItem);
-                        dscItemHelper.save();
-
-                    }
-
-                    Log.d(TAG, "FIN DSC ITEM");
-                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_DSC_ITEMS);
-
-
-                } catch (JSONException e) {
-
-                    Log.d(TAG, "JSONException " + e.toString());
-                    callback.onFailed(VolleyCallback.ON_RESPONSE_JSON_ERROR);
-                    e.printStackTrace();
-
-                } catch (UnsupportedEncodingException e) {
-
-                    Log.d(TAG, "UnsupportedEncodingException " + e.toString());
-
-                }
+                new GetDsc(response, callback).execute();
 
             }
         }, new Response.ErrorListener() {
@@ -593,5 +624,141 @@ public class PullRequest {
 
     }
 
+    public class GetDsc extends AsyncTask<Integer, Integer, Integer> {
+
+        String response;
+        VolleyCallback callback;
+
+        public GetDsc(String response, VolleyCallback callback) {
+            this.response = response;
+            this.callback = callback;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            switch (values[0]) {
+
+                case VolleyCallback.ON_DOWLINE_STATE_DSC:
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_DSC);
+                    break;
+                case VolleyCallback.ON_DOWLINE_STATE_DSC_ITEMS:
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_DSC_ITEMS);
+                    break;
+                case VolleyCallback.ON_DOWLINE_STATE_FORECAST:
+                    callback.onSuccess(VolleyCallback.ON_DOWLINE_STATE_FORECAST);
+                    break;
+
+            }
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... integers) {
+
+            try {
+
+                JSONObject jsonObject = new JSONObject(response);
+
+                JSONArray dscJsonArray = jsonObject.getJSONArray("dsc");
+                for (int i = 0; i < dscJsonArray.length(); i++) {
+
+                    JSONObject dscObject = dscJsonArray.getJSONObject(i);
+
+                    DownlineDsc dsc = new DownlineDsc();
+
+                    dsc.cid = dscObject.getInt("cid");
+                    dsc.branch = dscObject.getInt("branch");
+                    dsc.dscNo = dscObject.getString("dsc_no");
+
+                    dsc.routeId = dscObject.getInt("route_id");
+                    dsc.guardId = dscObject.getInt("guard_id");
+                    byte[] guardDateTime = Base64.decode(dscObject.getString("guard_datetime"), Base64.DEFAULT);
+                    dsc.guardTime = new String(guardDateTime, "UTF-8");
+                    dsc.trayIn = dscObject.getInt("trayIN");
+                    dsc.trayOut = dscObject.getInt("trayOUT");
+                    dsc.boTrayIn = dscObject.getInt("bo_tray_in");
+                    dsc.isPreloaded = (dscObject.getInt("ispreloaded") == 1);
+                    dsc.truckerId = dscObject.getInt("trucker_id");
+                    dsc.boConfirmed = (dscObject.getInt("bo_confirmed") == 1);
+                    dsc.cashierReceived = (dscObject.getInt("cashier_received") == 1);
+                    byte[] cashierReceivedDate = Base64.decode(dscObject.getString("cashier_received_date"), Base64.DEFAULT);
+                    dsc.cashierReceivedDate = new String(cashierReceivedDate, "UTF-8");
+                    byte[] datePosted = Base64.decode(dscObject.getString("trans_date"), Base64.DEFAULT);
+                    dsc.datePosted = new String(datePosted, "UTF-8");
+
+                    Log.d(TAG, "DSC " + dsc.dscNo);
+
+                    DownlineDscHelper dscHelper = new DownlineDscHelper(dsc);
+                    dscHelper.save();
+
+                }
+
+                Log.d(TAG, "FIN DSC");
+                publishProgress(VolleyCallback.ON_DOWLINE_STATE_DSC);
+
+
+                JSONArray dscItemsJsonArray = jsonObject.getJSONArray("dsc_items");
+
+                for (int i = 0; i < dscItemsJsonArray.length(); i++) {
+
+                    JSONObject dscItemsObject = dscItemsJsonArray.getJSONObject(i);
+
+                    DownlineDscItem dscItem = new DownlineDscItem();
+
+                    dscItem.dscId = dscItemsObject.getInt("dsc_id");
+                    dscItem.productCode = dscItemsObject.getInt("prod_code");
+                    dscItem.issued = dscItemsObject.getInt("issued");
+                    dscItem.trayCount = dscItemsObject.getInt("tray_count");
+                    dscItem.excessPack = dscItemsObject.getInt("excess_pack");
+
+                    DownlineDscItemHelper dscItemHelper = new DownlineDscItemHelper(dscItem);
+                    dscItemHelper.save();
+
+                }
+
+                Log.d(TAG, "FIN DSC ITEM");
+                publishProgress(VolleyCallback.ON_DOWLINE_STATE_DSC_ITEMS);
+
+                JSONArray forecastJsonArray = jsonObject.getJSONArray("forecasts");
+
+                for (int i = 0; i < forecastJsonArray.length(); i++){
+
+                    JSONObject forecastObject = forecastJsonArray.getJSONObject(i);
+
+                    DownlineForecast forecast = new DownlineForecast();
+
+                    forecast.cid = forecastObject.getInt("cid");
+                    forecast.routeCid = forecastObject.getInt("route_id");
+                    forecast.customerCid = forecastObject.getInt("customer_id");
+                    forecast.isDelivered = (forecastObject.getInt("isdelivered") == 1);
+                    forecast.storeClose = (forecastObject.getInt("storeclose") == 1);
+                    forecast.dscNo = forecastObject.getString("dsc_no");
+
+                    Log.d(TAG, "FORECAST CID " + forecast.cid);
+                    DownlineForecastHelper forecastHelper = new DownlineForecastHelper(forecast);
+                    forecastHelper.save();
+
+                }
+
+                Log.d(TAG, "FIN FORECAST");
+                publishProgress(VolleyCallback.ON_DOWLINE_STATE_FORECAST);
+
+
+
+            } catch (JSONException e) {
+
+                Log.d(TAG, "JSONException " + e.toString());
+                callback.onFailed(VolleyCallback.ON_RESPONSE_JSON_ERROR);
+                e.printStackTrace();
+
+            } catch (UnsupportedEncodingException e) {
+
+                Log.d(TAG, "UnsupportedEncodingException " + e.toString());
+
+            }
+
+            return null;
+        }
+    }
+
 }
-;
